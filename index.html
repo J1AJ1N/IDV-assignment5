@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assignment 5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    /* 页面基础样式 */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: linear-gradient(135deg, #f5f7fb, #e9f0ff);
+      color: #222;
+    }
+
+    .page-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 32px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #1f2933;
+    }
+
+    /* 四个展示框布局：放大卡片，并拉开间距 */
+    .assignments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+    }
+
+    .assignment-card {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.18s ease, box-shadow 0.18s ease,
+        border-color 0.18s ease;
+      cursor: pointer;
+    }
+
+    .assignment-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.14);
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+
+    /* 图片区域：略微变高一点，让卡片更“占屏幕” */
+    .card-image-wrapper {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #e0e7ff;
+    }
+
+    .card-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+
+    .assignment-card:hover .card-image-wrapper img {
+      transform: scale(1.04);
+    }
+
+    /* 文本区域 */
+    .card-content {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #111827;
+    }
+
+    .card-desc {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #4b5563;
+    }
+
+    .card-hint {
+      margin: 0;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* 弹出窗口遮罩层（保留全屏弹窗设置） */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none; /* 默认隐藏 */
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* 弹出窗口本体：全屏 */
+    .modal-content {
+      background: #ffffff;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      max-width: none;
+      max-height: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: none;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      background: #f9fafb;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .modal-close-btn {
+      border: none;
+      background: none;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      color: #666;
+      padding: 4px 8px;
+    }
+
+    .modal-close-btn:hover {
+      color: #111;
+    }
+
+    .modal-body {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .modal-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .modal-footer {
+      font-size: 12px;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border-top: 1px solid #eee;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .modal-footer a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .modal-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* 小屏适配 */
+    @media (max-width: 600px) {
+      .page-container {
+        padding-top: 32px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <!-- 抬头改成 Assignment 5 -->
+    <h1>Assignment 5</h1>
+
+    <div class="assignments-grid">
+      <!-- Assignment 1 -->
+      <div
+        class="assignment-card"
+        data-title="Assignment 1"
+        data-url="https://j1aj1n.github.io/IDV-assignment1"
+      >
+        <div class="card-image-wrapper">
+          <img src="https://raw.githubusercontent.com/j1aj1n/images/main/assignment1.jpg" alt="Assignment 1 preview" />
+        </div>
+        <div class="card-content">
+          <p class="card-title">Assignment 1</p>
+          <p class="card-desc">
+            在这里简要介绍 Assignment 1 的内容，例如主题、使用的数据或工具等。
+          </p>
+          <p class="card-hint">点击卡片查看详细内容</p>
+        </div>
+      </div>
+
+      <!-- Assignment 2 -->
+      <div
+        class="assignment-card"
+        data-title="Assignment 2"
+        data-url="https://j1aj1n.github.io/IDV-assignment2"
+      >
+        <div class="card-image-wrapper">
+          <img src="https://raw.githubusercontent.com/j1aj1n/images/main/assignment2.jpg" alt="Assignment 2 preview" />
+        </div>
+        <div class="card-content">
+          <p class="card-title">Assignment 2</p>
+          <p class="card-desc">
+            在这里简要介绍 Assignment 2 的内容，1–2 句说明即可。
+          </p>
+          <p class="card-hint">点击卡片查看详细内容</p>
+        </div>
+      </div>
+
+      <!-- Assignment 3 -->
+      <div
+        class="assignment-card"
+        data-title="Assignment 3"
+        data-url="https://j1aj1n.github.io/IDV-assignment3"
+      >
+        <div class="card-image-wrapper">
+          <img src="https://raw.githubusercontent.com/j1aj1n/images/main/assignment3.jpg" alt="Assignment 3 preview" />
+        </div>
+        <div class="card-content">
+          <p class="card-title">Assignment 3</p>
+          <p class="card-desc">
+            在这里简要介绍 Assignment 3，可以写方法、可视化形式等。
+          </p>
+          <p class="card-hint">点击卡片查看详细内容</p>
+        </div>
+      </div>
+
+      <!-- Assignment 4 -->
+      <div
+        class="assignment-card"
+        data-title="Assignment 4"
+        data-url="https://j1aj1n.github.io/IDV-assignment4"
+      >
+        <div class="card-image-wrapper">
+          <img src="https://raw.githubusercontent.com/j1aj1n/images/main/assignment4.jpg" alt="Assignment 4 preview" />
+        </div>
+        <div class="card-content">
+          <p class="card-title">Assignment 4</p>
+          <p class="card-desc">
+            在这里简要介绍 Assignment 4，例如研究问题、结论等。
+          </p>
+          <p class="card-hint">点击卡片查看详细内容</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹出窗口结构 -->
+  <div class="modal-overlay" id="assignmentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p class="modal-title" id="modalTitle">Assignment</p>
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close">
+          ×
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- 通过 JS 动态设置 src -->
+        <iframe
+          id="modalIframe"
+          class="modal-iframe"
+          src="about:blank"
+          title="Assignment content"
+        ></iframe>
+      </div>
+      <div class="modal-footer">
+        打不开可以
+        <a href="#" id="modalDirectLink" target="_blank" rel="noopener noreferrer"
+          >在新标签页中打开</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 选择所有卡片
+    const cards = document.querySelectorAll(".assignment-card");
+    const modal = document.getElementById("assignmentModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalIframe = document.getElementById("modalIframe");
+    const modalDirectLink = document.getElementById("modalDirectLink");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+    // 打开弹窗函数
+    function openModal(title, url) {
+      if (!url) return;
+      modalTitle.textContent = title || "Assignment";
+      modalIframe.src = url;
+      modalDirectLink.href = url;
+      modal.classList.add("active");
+    }
+
+    // 关闭弹窗函数
+    function closeModal() {
+      modal.classList.remove("active");
+      // 防止 iframe 一直加载
+      modalIframe.src = "about:blank";
+    }
+
+    // 为每个卡片绑定点击事件
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const title = card.getAttribute("data-title");
+        const url = card.getAttribute("data-url");
+        openModal(title, url);
+      });
+    });
+
+    // 关闭按钮
+    modalCloseBtn.addEventListener("click", closeModal);
+
+    // 点击遮罩关闭
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    // ESC 键关闭
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("active")) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
