@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASSIGNMENT3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+        }
+        
+        .work-item {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+            min-height: 350px;
+        }
+        
+        .work-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .image-container {
+            flex: 0 0 60%; /* 图片区域占比更大 */
+            position: relative;
+            overflow: hidden;
+            cursor: pointer; /* 添加指针样式表明可点击 */
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%; /* 图片高度与容器相同 */
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-container:hover img {
+            transform: scale(1.05);
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
+        
+        .view-button {
+            background: white;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .view-button:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+        
+        .description-container {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .work-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .work-description {
+            color: #555;
+            line-height: 1.7;
+            flex-grow: 1;
+            font-size: 1rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            height: 90%;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .work-item {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .image-container {
+                flex: 0 0 300px; /* 在移动设备上保持一定高度 */
+            }
+            
+            .description-container {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                height: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ASSIGNMENT3</h1>
+            <p class="subtitle">JIAJIN</p>
+        </header>
+        
+        <!-- 作品1 -->
+        <div class="work-item">
+            <div class="image-container" onclick="openModal('modal1')">
+                <!-- 请在这里替换为您的图片链接 -->
+                <img src="https://raw.githubusercontent.com/j1aj1n/IDV-assignment3/main/sketch.jpg" alt="sketch">
+                <div class="image-overlay">
+                    <!-- 请在这里替换为您的作业页面链接 -->
+                    <a href="#" class="view-button" onclick="event.preventDefault(); openModal('modal1')">Click</a>
+                </div>
+            </div>
+            <div class="description-container">
+                <h2 class="work-title">Chart 1</h2>
+                <div class="work-description">
+                    Use the PNG to SVG converter to convert the sketch to SVG format. Use DeepSeek to add color variations and an egg-smashing interactive feature to the SVG path.
+                </div>
+            </div>
+        </div>
+        
+        <!-- 作品2 -->
+        <div class="work-item">
+            <div class="image-container" onclick="openModal('modal2')">
+                <!-- 请在这里替换为您的图片链接 -->
+                <img src="https://raw.githubusercontent.com/j1aj1n/IDV-assignment3/main/optimisation-route.jpg" alt="optimisation-route">
+                <div class="image-overlay">
+                    <!-- 请在这里替换为您的作业页面链接 -->
+                    <a href="#" class="view-button" onclick="event.preventDefault(); openModal('modal2')">Click</a>
+                </div>
+            </div>
+            <div class="description-container">
+                <h2 class="work-title">Chart 2</h2>
+                <div class="work-description">
+                    Instruct AI to create a 20x20 grid background, setting each grid unit to 1. Set a random initial point, and connect the clicked point to the previous one.
+                </div>
+            </div>
+        </div>
+        
+        <!-- 作品3 -->
+        <div class="work-item">
+            <div class="image-container" onclick="openModal('modal3')">
+                <!-- 请在这里替换为您的图片链接 -->
+                <img src="https://raw.githubusercontent.com/j1aj1n/IDV-assignment3/main/vector-space.jpg" alt="vector-space">
+                <div class="image-overlay">
+                    <!-- 请在这里替换为您的作业页面链接 -->
+                    <a href="#" class="view-button" onclick="event.preventDefault(); openModal('modal3')">Click</a>
+                </div>
+            </div>
+            <div class="description-container">
+                <h2 class="work-title">Chart 3</h2>
+                <div class="work-description">
+                    Create a 10x10 background grid, with each grid cell representing a unit of 1. Set four movable coordinate points and connect each point with a line.
+                </div>
+            </div>
+        </div>
+        
+        <!-- 作品4 -->
+        <div class="work-item">
+            <div class="image-container" onclick="openModal('modal4')">
+                <!-- 请在这里替换为您的图片链接 -->
+                <img src="https://raw.githubusercontent.com/j1aj1n/IDV-assignment3/main/simple-bars.jpg" alt="simple-bars">
+                <div class="image-overlay">
+                    <!-- 请在这里替换为您的作业页面链接 -->
+                    <a href="#" class="view-button" onclick="event.preventDefault(); openModal('modal4')">Click</a>
+                </div>
+            </div>
+            <div class="description-container">
+                <h2 class="work-title">Chart 4</h2>
+                <div class="work-description">
+                    The images were output using doubao AI and d3.js, and interactive features were added using deepseek.
+                </div>
+            </div>
+        </div>
+        
+        <!-- 作品5 -->
+        <div class="work-item">
+            <div class="image-container" onclick="openModal('modal5')">
+                <!-- 请在这里替换为您的图片链接 -->
+                <img src="https://raw.githubusercontent.com/j1aj1n/IDV-assignment3/main/function.jpg" alt="function">
+                <div class="image-overlay">
+                    <!-- 请在这里替换为您的作业页面链接 -->
+                    <a href="#" class="view-button" onclick="event.preventDefault(); openModal('modal5')">Click</a>
+                </div>
+            </div>
+            <div class="description-container">
+                <h2 class="work-title">Chart 5</h2>
+                <div class="work-description">
+                    This was the most frustrating chart; it took countless adjustments to get it to the closest possible level. This is the best I could do; I simply couldn't go on.
+                </div>
+            </div>
+        </div>
+        
+       
+    </div>
+    
+    <!-- 模态窗口区域 -->
+    <!-- 请将您的页面链接替换到下面的iframe的src属性中 -->
+    
+    <!-- 作品1的模态窗口 -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal1')">&times;</span>
+            <!-- 将您的页面链接放在这里 -->
+            <iframe src="https://htmlpreview.github.io/?https://github.com/j1aj1n/IDV-assignment3/blob/main/sketch.html" class="modal-iframe"></iframe>
+        </div>
+    </div>
+    
+    <!-- 作品2的模态窗口 -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal2')">&times;</span>
+            <!-- 将您的页面链接放在这里 -->
+            <iframe src="https://htmlpreview.github.io/?https://github.com/j1aj1n/IDV-assignment3/blob/main/optimisation%20route.html" class="modal-iframe"></iframe>
+        </div>
+    </div>
+    
+    <!-- 作品3的模态窗口 -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal3')">&times;</span>
+            <!-- 将您的页面链接放在这里 -->
+            <iframe src="https://htmlpreview.github.io/?https://github.com/j1aj1n/IDV-assignment3/blob/main/vector-space.html" class="modal-iframe"></iframe>
+        </div>
+    </div>
+    
+    <!-- 作品4的模态窗口 -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal4')">&times;</span>
+            <!-- 将您的页面链接放在这里 -->
+            <iframe src="https://j1aj1n.github.io/IDV-assignment3/simple-bars.html" class="modal-iframe"></iframe>
+        </div>
+    </div>
+    
+    <!-- 作品5的模态窗口 -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal5')">&times;</span>
+            <!-- 将您的页面链接放在这里 -->
+            <iframe src="https://htmlpreview.github.io/?https://github.com/j1aj1n/IDV-assignment3/blob/main/function.html" class="modal-iframe"></iframe>
+        </div>
+    </div>
+    
+    <script>
+        // 打开模态窗口
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+        
+        // 关闭模态窗口
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto'; // 恢复背景滚动
+        }
+        
+        // 点击模态窗口背景关闭
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let i = 0; i < modals.length; i++) {
+                if (event.target === modals[i]) {
+                    modals[i].style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        }
+        
+        // 按ESC键关闭模态窗口
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modals = document.getElementsByClassName('modal');
+                for (let i = 0; i < modals.length; i++) {
+                    if (modals[i].style.display === 'flex') {
+                        modals[i].style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

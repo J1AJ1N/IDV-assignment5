@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Heatmap</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fff;
+    }
+
+    .axis text {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .cell-text {
+        font-size: 15px;
+        pointer-events: none;
+        fill: #000;
+        font-weight: 600;
+    }
+
+    .tooltip {
+        position: absolute;
+        background: rgba(0,0,0,0.85);
+        color: #fff;
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 5px;
+        white-space: nowrap;
+        pointer-events: none;
+        visibility: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    svg {
+        display: block;
+    }
+
+    /* hover highlight styles */
+    .cell {
+        transition: stroke 0.15s, stroke-width 0.15s, opacity 0.15s;
+    }
+    .cell-highlight {
+        stroke: #000;
+        stroke-width: 3px;
+    }
+    .cell-dim {
+        opacity: 0.25;
+    }
+    .cell-text-highlight {
+        fill: #000;
+        font-weight: 800;
+    }
+    .axis-label-highlight {
+        fill: #d62728;
+    }
+</style>
+</head>
+<body>
+
+<div id="heatmap"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// Defense models (columns)
+const models = ["ERM","DA","PGDT","TRADES","MART","RS","IBP","PRL","TandT"];
+
+// Attack methods (rows) — UPDATED FROM YOUR JSON
+const rows = [
+  {attack:"No Attack", vals:[94.85, 94.21, 84.38, 80.42, 81.54, 89.45, 48.40, 93.82, 94.23]},
+  {attack:"TIFGSM", vals:[35.10, 33.00, 65.70, 62.90, 69.10, 45.40, 40.20, 34.00, 92.80]},
+  {attack:"MIFGSM", vals:[0.00, 0.00, 50.90, 51.90, 50.50, 5.80, 38.10, 0.00, 92.80]},
+  {attack:"DIFGSM", vals:[1.00, 0.00, 51.75, 50.50, 53.60, 4.10, 38.10, 3.10, 92.80]},
+  {attack:"VMIFGSM", vals:[0.00, 0.00, 51.10, 50.90, 51.90, 4.10, 38.10, 0.00, 93.90]},
+  {attack:"TPGD", vals:[38.10, 39.20, 69.30, 69.10, 70.10, 48.50, 50.00, 28.90, 91.80]},
+  {attack:"FGSM", vals:[29.90, 25.80, 57.95, 54.60, 61.90, 28.90, 38.10, 25.80, 93.80]},
+  {attack:"RFGSM", vals:[0.00, 0.00, 49.15, 50.40, 48.50, 3.70, 38.10, 0.00, 90.00]},
+  {attack:"BIM", vals:[0.00, 0.00, 52.00, 57.20, 47.40, 2.10, 38.10, 0.00, 90.70]},
+  {attack:"FAB", vals:[1.00, 2.10, 43.00, 46.40, 40.20, 5.30, 38.10, 4.10, 90.10]},
+  {attack:"CW", vals:[0.00, 0.00, 32.20, 35.10, 29.90, 1.00, 40.20, 1.00, 92.90]},
+  {attack:"UPGD", vals:[0.00, 0.00, 49.85, 50.50, 49.80, 5.10, 38.10, 0.00, 93.80]},
+  {attack:"FFGSM", vals:[19.60, 23.70, 60.55, 55.70, 66.00, 33.00, 42.30, 29.90, 92.80]},
+  {attack:"Jitter", vals:[11.30, 12.40, 48.15, 47.40, 49.50, 34.00, 39.20, 24.70, 90.70]},
+  {attack:"PGD", vals:[0.00, 0.00, 57.40, 54.60, 60.80, 7.20, 40.20, 0.00, 91.80]},
+  {attack:"EOTPGD", vals:[0.00, 0.00, 50.10, 50.30, 50.50, 3.00, 38.10, 0.00, 90.70]},
+  {attack:"APGD", vals:[0.00, 0.00, 48.40, 51.00, 46.40, 1.00, 38.10, 0.00, 90.70]},
+  {attack:"NIFGSM", vals:[0.00, 0.00, 57.95, 56.70, 59.80, 7.20, 38.10, 1.00, 92.80]},
+  {attack:"SiniFGSM", vals:[4.10, 1.00, 59.00, 56.70, 61.90, 23.70, 38.10, 12.40, 93.70]},
+  {attack:"VNIFGSM", vals:[0.00, 0.00, 50.45, 53.00, 48.50, 5.10, 38.10, 0.00, 92.90]},
+  {attack:"APGDT", vals:[0.00, 0.00, 40.90, 44.30, 38.10, 0.00, 38.10, 0.00, 88.70]},
+  {attack:"Square", vals:[0.00, 1.00, 50.40, 54.00, 47.40, 3.10, 38.10, 2.10, 88.08]},
+  {attack:"Add Gaussian Noise", vals:[25.80, 43.30, 79.10, 78.40, 80.40, 74.20, 42.30, 45.40, 87.60]},
+  {attack:"OnePixel", vals:[79.40, 83.50, 78.05, 74.20, 82.50, 83.50, 42.50, 80.40, 89.70]},
+  {attack:"Pixle", vals:[0.00, 0.00, 12.55, 11.30, 14.40, 1.00, 10.30, 0.00, 17.50]},
+  {attack:"PGDL2", vals:[1.00, 0.00, 35.80, 36.10, 36.10, 5.20, 36.10, 0.00, 92.90]}
+];
+
+// Flatten to cell list
+const data = [];
+rows.forEach(r => {
+  models.forEach((m, j) => {
+    data.push({ attack: r.attack, model: m, value: r.vals[j] });
+  });
+});
+
+// Layout
+const margin = {top: 140, right: 100, bottom: 160, left: 320};
+const cellSize = 56;
+const width  = margin.left + margin.right + models.length * cellSize;
+const height = margin.top  + margin.bottom + rows.length   * cellSize;
+
+// SVG
+const svg = d3.select("#heatmap")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+// Scales
+const x = d3.scaleBand()
+  .domain(models)
+  .range([margin.left, width - margin.right])
+  .padding(0.10);
+
+const y = d3.scaleBand()
+  .domain(rows.map(d => d.attack))
+  .range([margin.top, height - margin.bottom])
+  .padding(0.10);
+
+// Color scale
+const [minVal, maxVal] = d3.extent(data, d => d.value);
+const color = d3.scaleSequential()
+  .domain([minVal, maxVal])
+  .interpolator(d3.interpolateBlues);
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+const format2 = d3.format(".2f");
+
+// Cells (initial color = minVal)
+const cells = svg.selectAll("rect.cell")
+  .data(data)
+  .enter()
+  .append("rect")
+  .attr("class", "cell")
+  .attr("x", d => x(d.model))
+  .attr("y", d => y(d.attack))
+  .attr("width", x.bandwidth())
+  .attr("height", y.bandwidth())
+  .attr("rx", 5)
+  .attr("ry", 5)
+  .attr("fill", color(minVal));
+
+// Text (initial 0.00)
+const texts = svg.selectAll("text.cell-text")
+  .data(data)
+  .enter()
+  .append("text")
+  .attr("class", "cell-text")
+  .attr("x", d => x(d.model) + x.bandwidth() / 2)
+  .attr("y", d => y(d.attack) + y.bandwidth() / 2 + 6)
+  .attr("text-anchor", "middle")
+  .text("0.00");
+
+// Axes (x labels rotated 45°)
+const xAxisG = svg.append("g")
+  .attr("class", "axis axis-x")
+  .attr("transform", `translate(0,${margin.top - 20})`)
+  .call(d3.axisTop(x));
+
+const xLabels = xAxisG.selectAll("text")
+  .style("text-anchor", "start")
+  .attr("dx", "0.5em")
+  .attr("dy", "0.2em")
+  .attr("transform", "rotate(-45)");
+
+const yAxisG = svg.append("g")
+  .attr("class", "axis axis-y")
+  .attr("transform", `translate(${margin.left - 20},0)`)
+  .call(d3.axisLeft(y));
+
+const yLabels = yAxisG.selectAll("text");
+
+// Animation: value & color over 2 seconds
+cells.transition()
+  .duration(2000)
+  .attrTween("fill", function(d) {
+    const interp = d3.interpolateNumber(minVal, d.value);
+    return t => color(interp(t));
+  });
+
+texts.transition()
+  .duration(2000)
+  .tween("text", function(d) {
+    const interp = d3.interpolateNumber(0, d.value);
+    return t => { this.textContent = format2(interp(t)); };
+  });
+
+// Hover interaction: highlight row + column & fancy tooltip
+cells.on("mouseover", function(event, d) {
+    tooltip.style("visibility", "visible")
+           .html(
+             `<div><strong>Attack:</strong> ${d.attack}</div>` +
+             `<div><strong>Model:</strong> ${d.model}</div>` +
+             `<div><strong>Accuracy:</strong> ${format2(d.value)}%</div>`
+           );
+
+    // Highlight cells in same row or column
+    cells
+      .classed("cell-highlight", c => c.attack === d.attack || c.model === d.model)
+      .classed("cell-dim", c => !(c.attack === d.attack || c.model === d.model));
+
+    // Highlight text in same row or column
+    texts.classed("cell-text-highlight",
+      c => c.attack === d.attack || c.model === d.model
+    );
+
+    // Highlight axis labels
+    xLabels.classed("axis-label-highlight", text => text === d.model);
+    yLabels.classed("axis-label-highlight", text => text === d.attack);
+  })
+  .on("mousemove", function(event) {
+    tooltip.style("left", event.pageX + 15 + "px")
+           .style("top",  event.pageY + 15 + "px");
+  })
+  .on("mouseout", function() {
+    tooltip.style("visibility", "hidden");
+
+    cells.classed("cell-highlight", false)
+         .classed("cell-dim", false);
+
+    texts.classed("cell-text-highlight", false);
+
+    xLabels.classed("axis-label-highlight", false);
+    yLabels.classed("axis-label-highlight", false);
+  });
+</script>
+
+</body>
+</html>
